@@ -2,21 +2,14 @@
              MultiParamTypeClasses, FunctionalDependencies, UndecidableInstances, FlexibleInstances,
              NoImplicitPrelude,
              TypeOperators #-}
-module TLNineDigits where
+module Main where
 
 import Data.TypeLevel.Bool
 import Data.TypeLevel.Num
-import Prelude (undefined)
-    
--- [a] = Nil | a ::: [a]
-data Nil
-data x ::: xs
-infixr 6 :::
+import Prelude (undefined, print)
 
--- Length :: [a] -> Int
-class Length xs n | xs -> n
-instance Length Nil D0
-instance (Length xs n, Succ n n') => Length (x ::: xs) n'
+import Data.TypeLevel.List
+import Data.TypeLevel.Num.Base10Division
     
 class IsEq c b | c -> b
 instance IsEq EQ True
@@ -37,13 +30,16 @@ class Value ds n | ds -> n
 instance Value Nil D0
 instance (Value ds n, Mul n D10 n', Add n' d n'') => Value (d ::: ds) n''
 
--- Divides :: Int -> Int -> Bool    
-class Divides q p b | q p -> b where
-instance (Mod p q r, IntEq r D0 b) => Divides q p b
+class Value'' ds n | ds -> n
+instance Value'' (d ::: Nil) d
+instance (Value'' (d' ::: ds) n) => Value'' (d ::: d' ::: ds) (d :* n)
 
+class Value' ds n | ds -> n
+instance (Reverse ds ds', Value'' ds' n) => Value' ds n
+    
 -- DivisorTest :: [Int] -> Bool    
 class DivisorTest ds b | ds -> b where
-instance (Value ds n, Length ds l, Divides l n b) => DivisorTest ds b
+instance (Reverse ds ds', Length ds l, Divides l ds' b) => DivisorTest ds b
 
 -- TestCandidate :: [Int] -> Bool    
 class TestCandidate ds b | ds -> b where
@@ -51,19 +47,63 @@ instance (Contains d ds b, Not b b', DivisorTest (d ::: ds) b'', And b' b'' b'''
 
 -- SearchI :: Int -> Bool -> Bool -> [Int] -> Int    
 class SearchI len good final ds v | len good final ds -> v where
-instance (Value ds v) => SearchI len True True ds v
+instance (Value' ds v) => SearchI len True True ds v
 instance (Search len (D1 ::: ds) v) => SearchI len True False ds v
 instance (Succ d d', Search len (d' ::: ds) v) => SearchI len False False (d ::: ds) v
     
 -- Search :: Int -> [Int] -> Int
 class Search len ds v | len ds -> v where
 instance (Search len (D1 ::: Nil) v) => Search len Nil v
-instance (Sub D0 D1 n1) => Search len (D10 ::: Nil) n1
+instance Search len (D10 ::: Nil) False
 instance (Succ d d', Search len (d' ::: ds) v) => Search len (D10 ::: d ::: ds) v
-instance (TestCandidate (d ::: ds) good, Length (d ::: ds) l, IntEq len l b, And good b final, SearchI len good final (d ::: ds) v) => Search len (d ::: ds) v
+-- instance (TestCandidate (d ::: ds) good, Length (d ::: ds) l, IntEq len l b, And good b final, SearchI len good final (d ::: ds) v) => Search len (d ::: ds) v
+
+instance (TestCandidate (D1 ::: ds) good, Length (D1 ::: ds) l, IntEq len l b, And good b final, SearchI len good final (D1 ::: ds) v) => Search len (D1 ::: ds) v
+instance (TestCandidate (D2 ::: ds) good, Length (D2 ::: ds) l, IntEq len l b, And good b final, SearchI len good final (D2 ::: ds) v) => Search len (D2 ::: ds) v
+instance (TestCandidate (D3 ::: ds) good, Length (D3 ::: ds) l, IntEq len l b, And good b final, SearchI len good final (D3 ::: ds) v) => Search len (D3 ::: ds) v
+instance (TestCandidate (D4 ::: ds) good, Length (D4 ::: ds) l, IntEq len l b, And good b final, SearchI len good final (D4 ::: ds) v) => Search len (D4 ::: ds) v
+instance (TestCandidate (D5 ::: ds) good, Length (D5 ::: ds) l, IntEq len l b, And good b final, SearchI len good final (D5 ::: ds) v) => Search len (D5 ::: ds) v
+instance (TestCandidate (D6 ::: ds) good, Length (D6 ::: ds) l, IntEq len l b, And good b final, SearchI len good final (D6 ::: ds) v) => Search len (D6 ::: ds) v
+instance (TestCandidate (D7 ::: ds) good, Length (D7 ::: ds) l, IntEq len l b, And good b final, SearchI len good final (D7 ::: ds) v) => Search len (D7 ::: ds) v
+instance (TestCandidate (D8 ::: ds) good, Length (D8 ::: ds) l, IntEq len l b, And good b final, SearchI len good final (D8 ::: ds) v) => Search len (D8 ::: ds) v
+instance (TestCandidate (D9 ::: ds) good, Length (D9 ::: ds) l, IntEq len l b, And good b final, SearchI len good final (D9 ::: ds) v) => Search len (D9 ::: ds) v
 
 
 search :: Search len ds v => len -> ds -> v    
 search = undefined
 
-test = search (undefined :: D9) (undefined :: Nil)
+--test = search (undefined :: D7) (undefined :: Nil)
+--test = search (undefined :: D7) (undefined :: D9 ::: D2 ::: D1 ::: Nil)
+--test' = search (undefined :: D1) (undefined :: D10 ::: Nil)
+test = search (undefined :: D3) (undefined :: Nil)
+
+-- 381654729       
+sol = undefined :: D3 :* D8 :* D1 :* D6 :* D5 :* D4 :* D7 :* D2 :* D9
+sol' = undefined :: D9 ::: D2 ::: D7 ::: D4 ::: D5 ::: D6 ::: D1 ::: D8 ::: D3 ::: Nil
+sol'' = undefined :: D3 ::: D8 ::: D1 ::: D6 ::: D5 ::: D4 ::: D7 ::: D2 ::: D9 ::: Nil
+
+value :: Value ds n => ds -> n
+value = undefined
+        
+value' :: Value' ds n => ds -> n
+value' = undefined
+       
+reverse :: Reverse xs xs' => xs -> xs'
+reverse = undefined
+        
+q3 = undefined :: D3
+q9 = undefined :: D9
+r12 = undefined :: D1 ::: D2 ::: Nil
+r30 = undefined :: D3 ::: D0 ::: Nil
+r31 = undefined :: D3 ::: D1 ::: Nil
+r36 = undefined :: D3 ::: D6 ::: Nil
+r21 = undefined :: D2 ::: D1 ::: Nil
+r0 = undefined :: D0 ::: Nil
+q1 = undefined :: D1
+
+
+q7 = undefined :: D7
+p393 = undefined :: D3 ::: D9 ::: D3 ::: Nil
+p392 = undefined :: D3 ::: D9 ::: D2 ::: Nil
+
+main = print test       
