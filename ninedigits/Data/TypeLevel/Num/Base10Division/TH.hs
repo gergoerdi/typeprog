@@ -10,7 +10,6 @@ import Language.Haskell.TH
 import Control.Monad
     
 class Divides q p b | q p -> b
-instance Divides q Nil True
 
 tdigit d = ConT $ mkName $ "Data.TypeLevel.Num.Reps.D" ++ show d
 tnil = ConT $ mkName "Data.TypeLevel.List.Nil"

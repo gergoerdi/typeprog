@@ -12,5 +12,6 @@ import Data.TypeLevel.List
     
 $(divBase 10)
  
+instance Divides q Nil True
 instance (Divides q ds b) => Divides q (D0 ::: ds) b
 instance (Divides q (d'':::ds) b, Sub (d :* d') q d'' ) => Divides q ((d :* d') ::: ds) b       
